@@ -6,16 +6,21 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
+
+	
+
 )
 
 func Gitops(win fyne.Window) fyne.CanvasObject {
 	//Read vars file for git data
+	utils.GetGitVars()
 
 	gitCard := widget.NewCard("Git Settings", "", makeGitFormEdit(win))
 
 	return gitCard
 }
 
+//
 func makeGitFormEdit(win fyne.Window) fyne.CanvasObject {
 
 	label := widget.NewLabel("Git Settings")
@@ -55,5 +60,10 @@ func makeGitFormEdit(win fyne.Window) fyne.CanvasObject {
 			}, win)
 
 		})
+
 	return edit
+}
+
+EditForm() {
+
 }

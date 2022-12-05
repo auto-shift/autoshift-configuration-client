@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	// TODO: Function to create or read vars file. File will only contain information used locally
+	utils.GetConfigs()
 
 	accApp := app.New()
 
@@ -24,6 +24,8 @@ func main() {
 	accWindow.SetMainMenu(utils.MakeMenu(accApp, accWindow))
 	accWindow.SetMaster()
 
+	fyne_objects.Gitops(accWindow)
+
 	top := widget.NewLabel("")
 	right := widget.NewLabel("")
 	bottom := canvas.NewText("For more information visit github.com/auto-shift", color.Black)
@@ -31,10 +33,10 @@ func main() {
 	bottom.TextStyle = fyne.TextStyle{Italic: true}
 
 	middle := container.NewAppTabs(
-		//TODO: Tab should allow configuration of cluster environment variables
-		container.NewTabItem("Cluster", widget.NewLabel("See TODO ")),
 		//TODO: Tab should allow configuration git credentials
 		container.NewTabItem("Gitops", fyne_objects.Gitops(accWindow)),
+		//TODO: Tab should allow configuration of cluster environment variables
+		container.NewTabItem("Cluster", widget.NewLabel("See TODO ")),
 		//TODO: Tab should allow configuration available CICD options
 		container.NewTabItem("CICD", widget.NewLabel("see TODO")),
 		//TODO: Tab should allow create a top oriented AppTabs object with a tab for each service.

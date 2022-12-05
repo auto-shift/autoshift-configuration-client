@@ -2,7 +2,9 @@ package utils
 
 import (
 	"fmt"
+	"log"
 	"net/url"
+	"os"
 
 	"fyne.io/fyne/v2/driver/desktop"
 
@@ -112,4 +114,12 @@ func shortcutFocused(s fyne.Shortcut, w fyne.Window) {
 	if focused, ok := w.Canvas().Focused().(fyne.Shortcutable); ok {
 		focused.TypedShortcut(s)
 	}
+}
+
+func GetConfigs() {
+	folderInfo, err := os.Stat("github.com/auto-shift/autoshift")
+	if os.IsNotExist(err) {
+
+	}
+	log.Println(folderInfo)
 }
