@@ -6,9 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
-
-	
-
+	"github.com/auto-shift/autoshift-configuration-client/cmd/internal/utils"
 )
 
 func Gitops(win fyne.Window) fyne.CanvasObject {
@@ -62,8 +60,4 @@ func makeGitFormEdit(win fyne.Window) fyne.CanvasObject {
 		})
 
 	return edit
-}
-
-EditForm() {
-
 }

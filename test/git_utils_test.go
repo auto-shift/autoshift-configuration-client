@@ -1,4 +1,4 @@
-package git_utils
+package utils
 
 import (
 	"testing"
@@ -6,10 +6,11 @@ import (
 	"github.com/auto-shift/autoshift-configuration-client/cmd/internal/utils"
 )
 
-func TestCloneDir(t *testing.T) {
+func TestGitClone(t *testing.T) {
 	type args struct {
-		repo   string
-		branch string
+		gitUser string
+		gitPass string
+		gitRepo string
 	}
 	tests := []struct {
 		name string
@@ -19,43 +20,7 @@ func TestCloneDir(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			utils.CloneDir(tt.args.repo, tt.args.branch)
-		})
-	}
-}
-
-func TestGitPull(t *testing.T) {
-	type args struct {
-		repo   string
-		branch string
-	}
-	tests := []struct {
-		name string
-		args args
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			utils.GitPull(tt.args.repo, tt.args.branch)
-		})
-	}
-}
-
-func TestGitPush(t *testing.T) {
-	type args struct {
-		repo   string
-		branch string
-	}
-	tests := []struct {
-		name string
-		args args
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			utils.GitPush(tt.args.repo, tt.args.branch)
+			utils.GitClone(tt.args.gitUser, tt.args.gitPass, tt.args.gitRepo)
 		})
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	billy "github.com/go-git/go-billy/v5"
-	memfs "github.com/go-git/go-billy/v5/memfs"
 	git "github.com/go-git/go-git/v5"
 	http "github.com/go-git/go-git/v5/plumbing/transport/http"
 	memory "github.com/go-git/go-git/v5/storage/memory"
@@ -52,6 +51,7 @@ func GitPush(repo, branch string) {
 
 }
 
-func getGitVars() {
+//TODO: reads git variables from cloned repository
+func GetGitVars() {
 
 }
