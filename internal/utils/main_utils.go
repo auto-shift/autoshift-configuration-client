@@ -2,11 +2,13 @@ package utils
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/url"
 	"os"
 
 	"fyne.io/fyne/v2/driver/desktop"
+	"gopkg.in/yaml.v3"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
@@ -119,7 +121,24 @@ func shortcutFocused(s fyne.Shortcut, w fyne.Window) {
 func GetConfigs() {
 	folderInfo, err := os.Stat("github.com/auto-shift/autoshift")
 	if os.IsNotExist(err) {
-
+		println("")
 	}
 	log.Println(folderInfo)
+}
+
+func ReadYaml(fileDir string, dataTyper interface{}) {
+	yfile, err := ioutil.ReadFile(fileDir)
+
+	if err != nil {
+
+		log.Fatal(err)
+	}
+
+	err2 := yaml.Unmarshal(yfile, &dataTyper)
+
+	if err2 != nil {
+
+		log.Fatal(err2)
+	}
+
 }

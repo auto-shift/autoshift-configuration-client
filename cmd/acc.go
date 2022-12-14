@@ -19,7 +19,7 @@ func main() {
 	accApp := app.New()
 
 	accWindow := accApp.NewWindow("AutoShift Configuration Client")
-	accWindow.Resize(fyne.NewSize(600, 600))
+	accWindow.Resize(fyne.NewSize(800, 600))
 
 	accWindow.SetMainMenu(utils.MakeMenu(accApp, accWindow))
 	accWindow.SetMaster()

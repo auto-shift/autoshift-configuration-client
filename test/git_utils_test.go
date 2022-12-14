@@ -11,12 +11,18 @@ func TestGitClone(t *testing.T) {
 		gitUser string
 		gitPass string
 		gitRepo string
+		gitDir string
 	}
 	tests := []struct {
 		name string
 		args args
 	}{
-		// TODO: Add test cases.
+		{
+			name: "test1",
+			args: args{
+				gitUser: 
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -21,6 +21,19 @@ func Gitops(win fyne.Window) fyne.CanvasObject {
 //
 func makeGitFormEdit(win fyne.Window) fyne.CanvasObject {
 
+	edit := widget.NewButton(
+		"edit",
+		func() {
+
+			GitConfDialog(win)
+
+		})
+
+	return edit
+}
+
+func GitConfDialog(win fyne.Window) fyne.CanvasObject {
+
 	label := widget.NewLabel("Git Settings")
 	label.Alignment = fyne.TextAlignCenter
 
@@ -32,7 +45,6 @@ func makeGitFormEdit(win fyne.Window) fyne.CanvasObject {
 
 	gitRepo := widget.NewEntry()
 	gitRepo.SetPlaceHolder("https://github.com/auto-shift/autoshift.git")
-
 	remember := false
 
 	items := []*widget.FormItem{
@@ -41,23 +53,18 @@ func makeGitFormEdit(win fyne.Window) fyne.CanvasObject {
 		widget.NewFormItem("Repository URL:", gitRepo),
 	}
 
-	edit := widget.NewButton(
-		"edit",
-		func() {
+	gitDialog := dialog.ShowForm("Edit Git Settings", "Confirm", "Cancel", items, func(b bool) {
+		if !b {
+			return
+		}
+		var rememberText string
+		if remember {
+			rememberText = "and remember this login"
+		}
 
-			dialog.ShowForm("Edit Git Settings", "Confirm", "Cancel", items, func(b bool) {
-				if !b {
-					return
-				}
-				var rememberText string
-				if remember {
-					rememberText = "and remember this login"
-				}
+		log.Println("Please Authenticate", userName.Text, password.Text, rememberText)
+	}, win)
 
-				log.Println("Please Authenticate", userName.Text, password.Text, rememberText)
-			}, win)
+	return gitDialog
 
-		})
-
-	return edit
 }
