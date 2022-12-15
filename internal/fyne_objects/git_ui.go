@@ -6,7 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
-	"github.com/auto-shift/autoshift-configuration-client/cmd/internal/utils"
+	"github.com/auto-shift/autoshift-configuration-client/cmd/acc/internal/utils"
 )
 
 func Gitops(win fyne.Window) fyne.CanvasObject {
@@ -32,7 +32,7 @@ func makeGitFormEdit(win fyne.Window) fyne.CanvasObject {
 	return edit
 }
 
-func GitConfDialog(win fyne.Window) fyne.CanvasObject {
+func GitConfDialog(win fyne.Window) {
 
 	label := widget.NewLabel("Git Settings")
 	label.Alignment = fyne.TextAlignCenter
@@ -53,7 +53,7 @@ func GitConfDialog(win fyne.Window) fyne.CanvasObject {
 		widget.NewFormItem("Repository URL:", gitRepo),
 	}
 
-	gitDialog := dialog.ShowForm("Edit Git Settings", "Confirm", "Cancel", items, func(b bool) {
+	dialog.ShowForm("Edit Git Settings", "Confirm", "Cancel", items, func(b bool) {
 		if !b {
 			return
 		}
@@ -64,7 +64,5 @@ func GitConfDialog(win fyne.Window) fyne.CanvasObject {
 
 		log.Println("Please Authenticate", userName.Text, password.Text, rememberText)
 	}, win)
-
-	return gitDialog
 
 }

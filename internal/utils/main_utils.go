@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/url"
-	"os"
 
 	"fyne.io/fyne/v2/driver/desktop"
 	"gopkg.in/yaml.v3"
@@ -14,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+// top menu functionality
 func MakeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 	newItem := fyne.NewMenuItem("New", nil)
 	checkedItem := fyne.NewMenuItem("Checked", nil)
@@ -118,27 +118,52 @@ func shortcutFocused(s fyne.Shortcut, w fyne.Window) {
 	}
 }
 
+// read git configs
 func GetConfigs() {
-	folderInfo, err := os.Stat("github.com/auto-shift/autoshift")
-	if os.IsNotExist(err) {
-		println("")
+
+	type GitVars struct {
+		GitDir  string `yaml:"gitDir"`
+		GitUrl  string `yaml:"gitUrl"`
+		GitUser string `yaml:"gitUser"`
+		GitPass string `yaml:"gitPass"`
 	}
-	log.Println(folderInfo)
-}
 
-func ReadYaml(fileDir string, dataTyper interface{}) {
-	yfile, err := ioutil.ReadFile(fileDir)
-
+	yfile, err := ioutil.ReadFile("../../configs/vars.yml")
 	if err != nil {
 
 		log.Fatal(err)
 	}
 
-	err2 := yaml.Unmarshal(yfile, &dataTyper)
+	// var gitVar GitVar
 
+	data := make(map[string]GitVars)
+
+	err2 := yaml.Unmarshal(yfile, data)
 	if err2 != nil {
-
-		log.Fatal(err2)
+		panic(err2)
 	}
+	log.Println(data)
 
 }
+
+// call to read yaml files
+// func ReadYaml(fileDir string) map[string]interface{} {
+
+// 	yfile, err := ioutil.ReadFile(fileDir)
+
+// 	if err != nil {
+
+// 		log.Fatal(err)
+// 	}
+
+// 	data := make(map[string]interface{})
+
+// 	err2 := yaml.Unmarshal(yfile, &data)
+
+// 	if err2 != nil {
+
+// 		log.Fatal(err2)
+// 	}
+
+// 	return data
+// }

@@ -3,30 +3,30 @@ package utils
 import (
 	"testing"
 
-	"github.com/auto-shift/autoshift-configuration-client/cmd/internal/utils"
+	"github.com/auto-shift/autoshift-configuration-client/cmd/acc/internal/utils"
 )
 
 func TestGitClone(t *testing.T) {
 	type args struct {
 		gitUser string
 		gitPass string
-		gitRepo string
-		gitDir string
+		gitUrl  string
+		gitDir  string
 	}
 	tests := []struct {
 		name string
 		args args
 	}{
 		{
-			name: "test1",
-			args: args{
-				gitUser: 
-			},
+			//test paramters
+			//e.g.
+			//name: <name>
+			//args: args{arg1:"", arg2: "", etc }
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			utils.GitClone(tt.args.gitUser, tt.args.gitPass, tt.args.gitRepo)
+			utils.GitClone(tt.args.gitUser, tt.args.gitPass, tt.args.gitUrl, tt.args.gitDir)
 		})
 	}
 }

@@ -1,5 +1,15 @@
 gitVars:
-  gitDir: ""
-  gitUrl: ""
-  gitUser: ""
-	gitPass: ""
+  gitDir: "test"
+  gitUrl: "test"
+  gitUser: "test"
+  gitPass: "test"
+
+
+testData:
+  test1: "this is a string"
+  test2: 7
+  test3: 
+    - test3a: "the first string"
+      test3a1: 1
+    - test3a: "the second string"
+      test3a1: 2
