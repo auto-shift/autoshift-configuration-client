@@ -2,16 +2,16 @@ package utils
 
 import (
 	"fmt"
-	"io/ioutil"
-	"log"
 	"net/url"
 
 	"fyne.io/fyne/v2/driver/desktop"
-	"gopkg.in/yaml.v3"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
 )
+
+//vars
+// structs
 
 // top menu functionality
 func MakeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
@@ -116,34 +116,6 @@ func shortcutFocused(s fyne.Shortcut, w fyne.Window) {
 	if focused, ok := w.Canvas().Focused().(fyne.Shortcutable); ok {
 		focused.TypedShortcut(s)
 	}
-}
-
-// read git configs
-func GetConfigs() {
-
-	type GitVars struct {
-		GitDir  string `yaml:"gitDir"`
-		GitUrl  string `yaml:"gitUrl"`
-		GitUser string `yaml:"gitUser"`
-		GitPass string `yaml:"gitPass"`
-	}
-
-	yfile, err := ioutil.ReadFile("../../configs/vars.yml")
-	if err != nil {
-
-		log.Fatal(err)
-	}
-
-	// var gitVar GitVar
-
-	data := make(map[string]GitVars)
-
-	err2 := yaml.Unmarshal(yfile, data)
-	if err2 != nil {
-		panic(err2)
-	}
-	log.Println(data)
-
 }
 
 // call to read yaml files

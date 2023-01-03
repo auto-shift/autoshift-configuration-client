@@ -2,11 +2,24 @@ package utils
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
+
+	"gopkg.in/yaml.v3"
 
 	git "github.com/go-git/go-git/v5"
 	http "github.com/go-git/go-git/v5/plumbing/transport/http"
 )
+
+//vars
+// structs
+type GitVars struct {
+	GitDir  string `yaml:"gitDir"`
+	GitUrl  string `yaml:"gitUrl"`
+	GitUser string `yaml:"gitUser"`
+	GitPass string `yaml:"gitPass"`
+}
 
 //Methods for interacting with a git repository
 func GitClone(gitUser, gitPass, gitDir, gitUrl string) {
@@ -44,8 +57,31 @@ func GitPush(repo, branch string) {
 
 }
 
-//TODO: reads git variables from cloned repository
-func GetGitVars() {
+// read git configs
+func ReadGitConfigs() GitVars {
+
+	yfile, err := ioutil.ReadFile("../../configs/vars.yml")
+	if err != nil {
+
+		log.Fatal(err)
+	}
+
+	var gitVars GitVars
+
+	err2 := yaml.Unmarshal(yfile, &gitVars)
+	if err2 != nil {
+		panic(err2)
+	}
+	return gitVars
+
+}
+
+func WriteGitConfigs(gitEdits GitVars) {
+	yEdits, err := yaml.Marshal(gitEdits)
+	if err != nil {
+		log.Println(err)
+	}
+	os.WriteFile("../../configs/vars.yml", yEdits, 0644)
 
 }
 
