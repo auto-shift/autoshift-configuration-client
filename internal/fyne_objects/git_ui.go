@@ -18,12 +18,6 @@ func GitSettings(win fyne.Window) fyne.CanvasObject {
 
 	gitInfo := utils.ReadGitConfigs()
 
-	gitPass := gitInfo.GitPass
-	password := gitPass
-	if password != "Not Set" {
-		password = "*****"
-	}
-
 	gitDir := gitInfo.GitDir
 	dir := binding.BindString(&gitDir)
 	gitDirHBox := container.New(
@@ -40,13 +34,6 @@ func GitSettings(win fyne.Window) fyne.CanvasObject {
 		widget.NewLabelWithData(user),
 	)
 
-	pass := binding.BindString(&gitPass)
-	gitPassHBox := container.New(
-		layout.NewHBoxLayout(),
-		widget.NewLabelWithStyle("Git Password:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-		widget.NewLabelWithData(pass),
-	)
-
 	gitUrl := gitInfo.GitUrl
 	url := binding.BindString(&gitUrl)
 	gitUrlHBox := container.New(
@@ -55,14 +42,27 @@ func GitSettings(win fyne.Window) fyne.CanvasObject {
 		widget.NewLabelWithData(url),
 	)
 
+	gitPass := widget.NewPasswordEntry()
+
+	items := []*widget.FormItem{
+		widget.NewFormItem("Password:", gitPass),
+	}
+	//buttons for performing git commands
 	gitops := container.New(
 		layout.NewHBoxLayout(),
 		widget.NewButton(
 			"Clone Remote Repo",
 			func() {
 
-				utils.GitClone(gitUser, gitPass, gitDir, gitUrl)
-
+				dialog.ShowForm("Please provide your git password", "Submit", "Cancel",
+					items,
+					func(b bool) {
+						if !b {
+							return
+						}
+						gitResp := utils.GitClone(gitUser, gitPass.Text, gitDir, gitUrl)
+						dialog.ShowInformation(gitResp[0], gitResp[1], win)
+					}, win)
 			},
 		),
 		widget.NewButton(
@@ -83,7 +83,7 @@ func GitSettings(win fyne.Window) fyne.CanvasObject {
 		),
 	)
 
-	gitInfoCont := container.New(layout.NewVBoxLayout(), gitDirHBox, gitUserHBox, gitPassHBox, gitUrlHBox, gitops)
+	gitInfoCont := container.New(layout.NewVBoxLayout(), gitDirHBox, gitUserHBox, gitUrlHBox, gitops)
 
 	return gitInfoCont
 }
@@ -101,11 +101,6 @@ func GitConfEditDialog(win fyne.Window) {
 	user := binding.BindString(&gitUser)
 	userName := widget.NewEntry()
 	userName.Bind(user)
-
-	gitPass := gitSettings.GitPass
-	pass := binding.BindString(&gitPass)
-	password := widget.NewPasswordEntry()
-	password.Bind(pass)
 
 	gitUrl := gitSettings.GitUrl
 	url := binding.BindString(&gitUrl)
@@ -129,7 +124,6 @@ func GitConfEditDialog(win fyne.Window) {
 
 	items := []*widget.FormItem{
 		widget.NewFormItem("UserName:", userName),
-		widget.NewFormItem("Password:", password),
 		widget.NewFormItem("Repository URL:", gitRepo),
 		widget.NewFormItem("choose a repository location:", repoDir),
 	}
@@ -143,7 +137,6 @@ func GitConfEditDialog(win fyne.Window) {
 			GitDir:  gitLoc,
 			GitUrl:  gitRepo.Text,
 			GitUser: userName.Text,
-			GitPass: password.Text,
 		}
 		utils.WriteGitConfigs(gitVars)
 		win.SetContent(AppMain(win))

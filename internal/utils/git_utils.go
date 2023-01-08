@@ -18,12 +18,11 @@ type GitVars struct {
 	GitDir  string `yaml:"gitDir"`
 	GitUrl  string `yaml:"gitUrl"`
 	GitUser string `yaml:"gitUser"`
-	GitPass string `yaml:"gitPass"`
 }
 
 //Methods for interacting with a git repository
-func GitClone(gitUser, gitPass, gitDir, gitUrl string) {
-
+func GitClone(gitUser, gitPass, gitDir, gitUrl string) []string {
+	var resp []string
 	r, err := git.PlainClone(gitDir, false, &git.CloneOptions{
 		// The intended use of a GitHub personal access token is in replace of your password
 		// because access tokens can easily be revoked.
@@ -43,9 +42,13 @@ func GitClone(gitUser, gitPass, gitDir, gitUrl string) {
 	// ... retrieving the commit object
 	commit, err := r.CommitObject(ref.Hash())
 	if os.IsNotExist(err) {
-		println(err)
+		resp[0] = "Clone Failed"
+		resp[1] = fmt.Sprintln(err)
+		return resp
 	}
-	fmt.Println(commit)
+	resp[0] = "Clone Successful"
+	resp[1] = fmt.Sprintln(commit)
+	return resp
 
 }
 
