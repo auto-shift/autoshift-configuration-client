@@ -44,8 +44,11 @@ func GitSettings(win fyne.Window) fyne.CanvasObject {
 
 	gitPass := widget.NewPasswordEntry()
 
+	// gitBranch := widget.NewEntry()
+
 	items := []*widget.FormItem{
 		widget.NewFormItem("Password:", gitPass),
+		// widget.NewFormItem("Branch Name:", gitBranch),
 	}
 	//buttons for performing git commands
 	gitops := container.New(
@@ -54,14 +57,15 @@ func GitSettings(win fyne.Window) fyne.CanvasObject {
 			"Clone Remote Repo",
 			func() {
 
-				dialog.ShowForm("Please provide your git password", "Submit", "Cancel",
+				dialog.ShowForm("Please provide:", "Submit", "Cancel",
 					items,
 					func(b bool) {
 						if !b {
 							return
 						}
-						gitResp := utils.GitClone(gitUser, gitPass.Text, gitDir, gitUrl)
-						dialog.ShowInformation(gitResp[0], gitResp[1], win)
+						utils.GitClone(gitUser, gitPass.Text, gitDir, gitUrl)
+						// gitResp := utils.GitClone(gitUser, gitPass.Text, gitDir, gitUrl)
+						// dialog.ShowInformation(gitResp[0], gitResp[1], win)
 					}, win)
 			},
 		),

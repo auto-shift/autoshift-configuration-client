@@ -21,44 +21,74 @@ type GitVars struct {
 }
 
 //Methods for interacting with a git repository
-func GitClone(gitUser, gitPass, gitDir, gitUrl string) []string {
-	var resp []string
-	r, err := git.PlainClone(gitDir, false, &git.CloneOptions{
+func GitClone(gitUser, gitPass, gitDir, gitUrl string) {
+	// var resp []string
+
+	path := gitDir + "/autoShift"
+
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		err := os.Mkdir(path, 0775)
+		// TODO: handle error
+		fmt.Println(err)
+	}
+
+	r, err := git.PlainClone(path, false, &git.CloneOptions{
 		// The intended use of a GitHub personal access token is in replace of your password
 		// because access tokens can easily be revoked.
 		// https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/
 		Auth: &http.BasicAuth{
 			Username: gitUser, // yes, this can be anything except an empty string
-			Password: string(gitPass),
+			Password: gitPass,
 		},
 		URL:      gitUrl,
 		Progress: os.Stdout,
 	})
-	CheckIfError(err)
+	if err != nil {
+		fmt.Println("err1")
+		fmt.Println(err)
+	}
 
 	ref, err := r.Head()
+	if err != nil {
+		fmt.Println("err2")
+		fmt.Println(err)
+	}
+
+	err = r.Storer.SetReference(ref)
 	CheckIfError(err)
 
 	// ... retrieving the commit object
 	commit, err := r.CommitObject(ref.Hash())
 	if os.IsNotExist(err) {
-		resp[0] = "Clone Failed"
-		resp[1] = fmt.Sprintln(err)
-		return resp
+
+		// resp[0] = "Clone Failed"
+		// resp[1] = fmt.Sprintln(err)
+		// return resp
+		fmt.Println(err)
 	}
-	resp[0] = "Clone Successful"
-	resp[1] = fmt.Sprintln(commit)
-	return resp
+
+	// resp[0] = "Clone Successful"
+	// resp[1] = fmt.Sprintln(commit)
+	// return resp
+	fmt.Println(commit)
 
 }
 
-func GitPull(repo, branch string) {
+// func gitBranch() {
 
-}
+// }
 
-func GitPush(repo, branch string) {
+// func gitCheckout() {
 
-}
+// }
+
+// func GitPull(repo, branch string) {
+
+// }
+
+// func GitPush(repo, branch string) {
+
+// }
 
 // read git configs
 func ReadGitConfigs() GitVars {
