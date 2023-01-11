@@ -1,4 +1,4 @@
-module github.com/auto-shift/autoshift-configuration-client/cmd
+module github.com/auto-shift/autoshift-configuration-client/cmd/acc
 
 go 1.18
 

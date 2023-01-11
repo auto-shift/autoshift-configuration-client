@@ -2,9 +2,7 @@ package utils
 
 import (
 	"fmt"
-	"log"
 	"net/url"
-	"os"
 
 	"fyne.io/fyne/v2/driver/desktop"
 
@@ -12,6 +10,10 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+//vars
+// structs
+
+// top menu functionality
 func MakeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 	newItem := fyne.NewMenuItem("New", nil)
 	checkedItem := fyne.NewMenuItem("Checked", nil)
@@ -116,10 +118,24 @@ func shortcutFocused(s fyne.Shortcut, w fyne.Window) {
 	}
 }
 
-func GetConfigs() {
-	folderInfo, err := os.Stat("github.com/auto-shift/autoshift")
-	if os.IsNotExist(err) {
+// call to read yaml files
+// func ReadYaml(fileDir string) map[string]interface{} {
 
-	}
-	log.Println(folderInfo)
-}
+// 	yfile, err := ioutil.ReadFile(fileDir)
+
+// 	if err != nil {
+
+// 		log.Fatal(err)
+// 	}
+
+// 	data := make(map[string]interface{})
+
+// 	err2 := yaml.Unmarshal(yfile, &data)
+
+// 	if err2 != nil {
+
+// 		log.Fatal(err2)
+// 	}
+
+// 	return data
+// }
