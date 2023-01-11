@@ -1,1 +1,321 @@
 package configs
+
+// iac-ansible options
+// setup_dependencies: true
+// create_cluster: true
+// install_argo: true
+// install_argo_apps: true
+// remove_kubeadmin: true
+//
+//iac-ansible variables
+// Image version should match argo-containers/argocd-repo-server-sops/Dockerfile
+
+type Argo_Image struct {
+	argocd_image_version string `yaml:"argocd_image_version"`
+}
+
+type Gitops_Vars struct {
+	region          string `yaml:"region"`
+	branch_tag      string `yaml:"branch"`
+	organization    string `yaml:"organization"`
+	github_url      string `yaml:"github_url"`
+	gitops_repo_url string `yaml:"gitops_repo_url"`
+}
+
+// # AWS SecretsManager vars
+// # Secret Locations for nested secrets
+type Ocp_secrets struct {
+	ocp_secrets                string `yaml:"ocp_secrets"`
+	cw_secrets                 string `yaml:"cw_secrets"`
+	ocp_install_secrets        string `yaml:"ocp_install_secrets"`
+	credentials_mode           string `yaml:"credentials_mode"`
+	pull_secret                string `yaml:"pull_secret"`
+	ocp_install_aws_access_key string `yaml:"ocp_install_aws_access_key"`
+	ocp_install_aws_secret_key string `yaml:"ocp_install_aws_secret_key"`
+}
+
+// # Day 1
+// # gitops-operator
+type Day_One_Vars struct {
+	gitops_enabled          bool   `yaml:"gitops_enabled"`
+	argocd_pgp_private_key  string `yaml:"argocd_pgp_private_key"`
+	git_user                string `yaml:"git_user"`
+	git_token               string `yaml:"git_token"`
+	gitops_namespace        string `yaml:"gitops_namespace"`
+	gitops_admin_passphrase string `yaml:"gitops_admin_passphrase"`
+}
+
+// # infra-nodes
+type Infra_Nodes struct {
+	infra_nodes_enabled bool
+	infra               struct {
+		ec2_type bool
+		ebs      struct {
+			encrypted  bool
+			iops       int
+			volumesize int
+			volumetype string
+		}
+		rootvolume struct {
+			iops           int
+			size           int
+			rootVolumeType string `yaml:"type"`
+		}
+	}
+}
+
+// # master-nodes
+// master:
+//   ec2_type: m5.2xlarge
+//   rootvolume:
+//     iops: 2000
+//     size: 120
+//     type: io1
+//   replicas: 3
+
+// # storage-nodes
+// storage_node_enabled: true
+// storage:
+//   ec2_type: m5.4xlarge
+//   ebs:
+//     encrypted: true
+//     iops: 0
+//     volumesize: 120
+//     volumetype: gp2
+//   rootvolume:
+//     iops: 2000
+//     size: 120
+//     type: io1
+//   replicas: 3
+
+// # worker-nodes
+// worker_node_enabled: true
+// worker:
+//   ec2_type: m5.4xlarge
+//   ebs:
+//     encrypted: true
+//     iops: 0
+//     volumesize: 120
+//     volumetype: gp2
+//   rootvolume:
+//     iops: 2000
+//     size: 120
+//     type: io1
+//   replicas: 3
+
+// # machine-health-checks
+// machine_health_checks_enabled: true
+// machinehealthchecks:
+// - node: infra
+//   role: infra
+// - node: storage
+//   role: worker
+// - node: worker
+//   role: worker
+
+// # manual-remediations
+// manual_remediations_enabled: true
+// allowedRegistriesForImport:
+// - domainName: quay.io
+//   insecure: false
+// - domainName: registry.connect.redhat.com
+//   insecure: false
+// - domainName: registry.redhat.io
+//   insecure: false
+// allowedRegistries:
+// - registry.connect.redhat.com
+// - quay.io
+// - registry.redhat.io
+
+// # Openshift Data Foundation
+// # Note: Dependant on storage_node_enabled
+// odf_enabled: true
+
+// # Disable Sample Operators
+// disable_sample_operators: true
+
+// # Day 2
+// # Ploigos Trusted Software Supply Chain
+// tssc_enabled: true
+
+// # amq-broker-rhel8
+// amq_broker_enabled: true
+
+// # AAP Secrets
+// aap_enabled: true
+// aap_host: "{{ ocp_secrets.aap_host }}"
+// aap_username: "{{ ocp_secrets.aap_username }}"
+// aap_password: "{{ ocp_secrets.aap_password }}"
+
+// # Certs
+// custom_certs_enabled: true
+// api_cert: "{{ lookup('aws_secret', 'ocp_api_cert', region=vars['region']) }}"
+// api_cert_key: "{{ lookup('aws_secret', 'ocp_api_cert_key', region=vars['region']) }}"
+// console_cert: "{{ lookup('aws_secret', 'ocp_console_cert', region=vars['region']) }}"
+// console_cert_key: "{{ lookup('aws_secret', 'ocp_console_cert_key', region=vars['region']) }}"
+// ingress_cert: "{{ lookup('aws_secret', 'ocp_ingress_cert', region=vars['region']) }}"
+// ingress_cert_key: "{{ lookup('aws_secret', 'ocp_ingress_cert_key', region=vars['region']) }}"
+// ingress_cert_ca: "{{ lookup('aws_secret', 'ocp_ingress_cert_ca', region=vars['region']) }}"
+// ca_cert: "{{ lookup('aws_secret', 'ocp_ldap_ca', region=vars['region']) }}"
+
+// # cluster-autoscaling
+// cluster_autoscaling_enabled: true
+// pod_priority_threshold: -10
+// resource_limits:
+//   max_nodes_total: 22
+//   cores:
+//     min: 72
+//     max: 344
+//   memory:
+//     min: 288
+//     max: 1376
+// scaledown:
+//   enabled: true
+//   delay_after_add: 10m
+//   delay_after_delete: 5m
+//   delay_after_failure: 30s
+//   unneeded_time: 60s
+
+// # container-security-operator
+// container_security_operator: true
+
+// # custom-console
+// custom_console: true
+
+// # disable-self-provisioner
+// disable_self_provisioner: true
+
+// # file-integrity-operator
+// file_integrity_operator: true
+
+// # gatekeeper-operator
+// gatekeeper_operator: true
+// gk_img_tag: v3.3.0-18
+// allowed_git_repos:
+// - repo: https://github.com/bacarr-rh/autoshift
+
+// # Cloud Watch Logging
+// cw_log_forwarding_enabled: true
+// cloudwatch_aws_access_key: "{{ cw_secrets.aws_access_key_id }}"
+// cloudwatch_aws_secret_key: "{{ cw_secrets.aws_secret_access_key }}"
+
+// # Oauth Secrets
+// oauth:
+//   groupsync_enabled: false
+//   group_membership_attr: uniquemember
+//   group_name_attr: cn
+//   basedn:
+//   user_name_attr: uid
+//   user_uid_attr: dn
+//   sync_schedule: 0,10,20,30,40,50 * * * *
+//   ldap_enabled: false
+//   binddn: "{{ ocp_secrets.binddn }}"
+//   ldapurl: "{{ ocp_secrets.ldapurl }}"
+//   ldap_password: "{{ ocp_secrets.ldap_password }}"
+//   radiant_ldab_enabled: false
+//   radiant_binddn: "{{ ocp_secrets.radiant_binddn }}"
+//   radiant_url: "{{ ocp_secrets.radiant_url }}"
+//   radiant_password: "{{ ocp_secrets.radiant_password }}"
+//   okta_oath_enabled: false
+//   okta_client_id: "{{ ocp_secrets.okta_client_id }}"
+//   okta_client_secret: "{{ ocp_secrets.okta_client_secret }}"
+//   okta_issuer: "{{ ocp_secrets.okta_issuer }}"
+
+// # openshift-compliance-operator
+// openshift_compliance_operator: true
+
+// # Cluster Logging
+// openshift_logging:
+//   enabled: false
+//   logging_namespace: openshift-logging
+//   fluentd_loglevel: warn
+//   # How long to keep application logs
+//   application_logs_max_age: 1d
+//   # How long to keep infrastructure logs
+//   infra_logs_max_age: 7d
+//   # How long to keep audit logs
+//   audit_logs_max_age: 7d
+//   # Number of elasticsearch instances
+//   elasticsearch_node_count: 3
+//   # Storage class for elasticsearch persistent volumes
+//   elasticsearch_storage_class: "gp2"
+//   # Size of each elasticsearch volume
+//   elasticsearch_storage_size: "200G"
+//   # Number of kibana replicas
+//   kibana_replicas: 1
+//   # Curator log pruning schedule
+//   curator_schedule: "30 3 * * *"
+//   # Method for installation plan approval
+//   install_plan_approval: "Automatic"
+
+// # Openshift Monitoring
+// openshift_monitoring_enabled: true
+
+// # ACM Vars
+// acm_enabled: true
+// mgmt_cluster: false
+// cluster_set: autoshift-clusters
+// acm_channel: release-2.5
+
+// # New Relic Secrets
+// new_relic_enabled: true
+// new_relic_license_key: "{{ ocp_secrets.new_relic_license_key }}"
+// new_relic_pixie_deploy_key: "{{ ocp_secrets.new_relic_pixie_deploy_key }}"
+// new_relic_pixie_api_key: "{{ ocp_secrets.new_relic_pixie_api_key }}"
+
+// # Docker Registry Secrets
+// artifactory_pull_secret: "{{ ocp_secrets.artifactory_pull_secret }}"
+// svc_acct: "{{ lookup('aws_secret', 'svc-acct', region=vars['region']) }}"
+// svc_acct_name: "{{ svc_acct.account_name }}"
+// svc_acct_password: "{{ svc_acct.account_password }}"
+
+// # Pager Duty Secrets
+// pager_duty_enabled: true
+// pagerduty_events_key: "{{ ocp_secrets.pagerduty_events_key }}"
+// pagerduty_prometheus_key: "{{ ocp_secrets.pagerduty_prometheus_key }}"
+
+// # ACS Secrets
+// acs_enabled: true
+// acs_central_cluster: false
+// acs_init_bundle: "{{ ocp_secrets.acs_init_bundle }}"
+
+// # Fluentbit Splunk Log Forwarding
+// fluentbit_enabled: true
+// splunk_hec_token: "{{ ocp_secrets.splunk_hec_token }}"
+// splunk_channel_id: "{{ ocp_secrets.splunk_channel_id }}"
+// cloud_account: "{{ ocp_secrets.cloud_account }}"
+// fluent_bit:
+//   namespace: fluent-bit-logging
+//   cm_name: fluent-bit
+//   secret_name: fluent-bit-secrets
+//   splunk_hec_url: hec.splunk.backends.cms.gov
+//   image:
+//     repository: registry.connect.redhat.com/calyptia/fluent-bit
+//     tag: 1.9.6
+//     pullPolicy: IfNotPresent
+//   rbac:
+//     nodeAccess: true
+//   podSecurityPolicy:
+//     create: true
+//   openShift:
+//     enabled: true
+//     securityContextConstraints:
+//       create: true
+//   securityContext:
+//     capabilities:
+//       drop:
+//       - ALL
+//     readOnlyRootFilesystem: true
+//     runAsNonRoot: true
+//     runAsUser: 1000
+//     privileged: true
+
+// # OADP
+// # GLOBAL- region, organization, cluster_name
+// oadp_enabled: true
+
+// # Code Ready Workspace
+// code_ready_workspace_enabled: false
+
+// # Serverless
+// serverless_enabled: false
