@@ -8,9 +8,16 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"github.com/auto-shift/autoshift-configuration-client/cmd/acc/internal/utils"
 	git "github.com/go-git/go-git/v5"
 	http "github.com/go-git/go-git/v5/plumbing/transport/http"
 )
+
+func init() {
+	logFile := utils.LogFile
+
+	log.SetOutput(logFile)
+}
 
 //vars
 // structs
@@ -126,4 +133,15 @@ func CheckIfError(err error) {
 
 	fmt.Printf("\x1b[31;1m%s\x1b[0m\n", fmt.Sprintf("error: %s", err))
 	os.Exit(1)
+}
+
+func LocalRepo() bool {
+	gitDir := ReadGitConfigs().GitDir
+	log.Println(gitDir)
+	_, err := os.Stat(gitDir + "/autoShift")
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	return true
 }
