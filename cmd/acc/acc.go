@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 
@@ -24,8 +22,6 @@ func main() {
 
 	if impls.ReadGitConfigs().GitDir == "Not Set" {
 		fyne_objects.GitConfEditDialog(mainWin)
-	} else {
-		fmt.Println("condition false")
 	}
 
 	mainWin.Show()

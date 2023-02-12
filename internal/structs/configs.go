@@ -15,11 +15,12 @@ package structs
 // }
 
 type Gitops_Vars struct {
-	region          string `yaml:"region"`
-	branch_tag      string `yaml:"branch"`
-	organization    string `yaml:"organization"`
-	github_url      string `yaml:"github_url"`
-	gitops_repo_url string `yaml:"gitops_repo_url"`
+	region               string `yaml:"region"`
+	branch_tag           string `yaml:"branch"`
+	organization         string `yaml:"organization"`
+	github_url           string `yaml:"github_url"`
+	gitops_repo_url      string `yaml:"gitops_repo_url"`
+	argocd_image_version string `yaml:"argocd_image_version"`
 }
 
 // # AWS SecretsManager vars

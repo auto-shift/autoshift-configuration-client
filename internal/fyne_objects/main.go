@@ -2,41 +2,80 @@ package fyne_objects
 
 import (
 	"fmt"
-	"image/color"
+	"log"
 	"net/url"
+	"time"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/auto-shift/autoshift-configuration-client/cmd/acc/internal/impls"
 	"github.com/auto-shift/autoshift-configuration-client/cmd/acc/internal/utils"
 )
 
+var remove_kubeadmin = false
+
+func init() {
+	log.SetOutput(utils.LogFile)
+}
+
 func AppMain(win fyne.Window) fyne.CanvasObject {
+	// logList := utils.GetLogs()
+	// logs := binding.BindStringList(&(utils.GetLogs()))
 
-	logText := binding.NewString()
-	logText.Set(utils.GetLogs())
+	logs := binding.NewStringList()
+	logs.Set(utils.GetLogs())
 
+	list := widget.NewListWithData(logs,
+		func() fyne.CanvasObject {
+			logLabel := widget.NewLabel("                                                                                                                            ")
+
+			return logLabel
+		},
+		func(i binding.DataItem, o fyne.CanvasObject) {
+			o.(*widget.Label).Bind(i.(binding.String))
+		})
+
+	sep := widget.NewSeparator()
+
+	right := container.New(layout.NewHBoxLayout(), sep, container.NewVScroll(list))
+	right.Resize(fyne.Size{Height: 600})
 	top := widget.NewLabel("")
-	right := widget.NewLabelWithData(logText)
 
-	bottom := canvas.NewText("For more information visit github.com/auto-shift", color.Black)
-	bottom.Alignment = fyne.TextAlignCenter
-	bottom.TextStyle = fyne.TextStyle{Italic: true}
+	buildOpts := widget.NewRadioGroup([]string{"New", "Rebaseline"}, func(s string) {
+		if s == "New" {
+			log.Println("Creating a new cluster")
+		}
+		if s == "Rebaseline" {
+			log.Println("Rebase existing cluster")
+		}
+	})
+
+	buildOpts.Horizontal = true
+	buildOpts.SetSelected("New")
+
+	bottom := container.New(
+		layout.NewHBoxLayout(),
+		layout.NewSpacer(),
+		buildOpts,
+		widget.NewLabel(" "),
+		widget.NewButton("Build", func() {}),
+	)
 
 	middle := container.NewAppTabs(
 		//TODO: Tab should allow configuration git credentials
-		container.NewTabItem("Gitops", GitSettings(win)),
+		container.NewTabItem("General", generalSettings(win)),
 		//TODO: Tab should allow configuration of cluster environment variables
 		container.NewTabItem("Cluster", clusterSettings()),
 		//TODO: Tab should allow configuration available CICD options
-		container.NewTabItem("CICD", widget.NewLabel("see TODO")),
+		container.NewTabItem("CICD", Test()),
 		//TODO: Tab should allow create a top oriented AppTabs object with a tab for each service.
-		container.NewTabItem("Services", widget.NewLabel("See TODO")),
+		container.NewTabItem("Day 1 Apps", DayOneSettings(win)),
+		container.NewTabItem("Day 2 Apps", DayTwoSettings(win)),
 	)
 	if !impls.LocalRepo() {
 		middle.DisableIndex(1)
@@ -48,8 +87,37 @@ func AppMain(win fyne.Window) fyne.CanvasObject {
 
 	content := container.NewBorder(top, bottom, nil, right, middle)
 
+	go func() {
+		for range time.Tick(time.Second) {
+			logs.Set(utils.GetLogs())
+		}
+	}()
+
 	return content
 }
+
+func generalSettings(win fyne.Window) fyne.CanvasObject {
+
+	settings := container.New(
+		layout.NewVBoxLayout(),
+		widget.NewCard("Git Settings", "",
+			GitSettings(win)),
+		widget.NewCard("Installation Settings", "",
+			container.NewGridWithColumns(3,
+				widget.NewCheck("Remove Kubeadmin", func(b bool) {
+					if b {
+						remove_kubeadmin = true
+					} else {
+						remove_kubeadmin = false
+					}
+				}),
+			),
+		),
+	)
+	return settings
+}
+
+/// Menu functions
 
 func MakeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 	newItem := fyne.NewMenuItem("New", nil)

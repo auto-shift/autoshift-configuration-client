@@ -1,14 +1,14 @@
 package utils
 
 import (
+	"bufio"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"time"
 
-	"gopkg.in/yaml.v3"
+	"fyne.io/fyne/v2/data/binding"
 )
 
 var LogFileLoc string
@@ -21,12 +21,8 @@ func init() {
 		fmt.Println("logloc error: ")
 		fmt.Println(err)
 	}
-	fmt.Println("logloc: ")
-	fmt.Println(logLoc)
 
 	LogFileLoc = logLoc + "/" + currDateTime
-
-	fmt.Println(LogFileLoc)
 
 	LogFile, err = os.OpenFile(LogFileLoc, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
@@ -39,22 +35,31 @@ func init() {
 	log.Println("Welcome to AutoShift Configuration Client")
 }
 
-func GetLogs() string {
-	yfile, err := ioutil.ReadFile(LogFileLoc)
+func GetLogs() []string {
+	//yfile, err := ioutil.ReadFile(LogFileLoc)
 
+	file, err := os.Open(LogFileLoc)
 	if err != nil {
 
 		log.Fatal(err)
 	}
+	defer file.Close()
+	logs := []string{}
 
-	var data string
-	err2 := yaml.Unmarshal(yfile, &data)
-
-	if err2 != nil {
-
-		log.Fatal(err2)
+	scanner := bufio.NewScanner(file)
+	scanner.Split(bufio.ScanLines)
+	for scanner.Scan() {
+		logs = append(logs, scanner.Text())
 	}
 
-	return data
+	return logs
 
+}
+
+func GetString(bs binding.String) string {
+	logs, err := bs.Get()
+	if err != nil {
+		log.Println(err)
+	}
+	return logs
 }
