@@ -1,14 +1,25 @@
 package fyne_objects
 
 import (
+	"log"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
+	"github.com/auto-shift/autoshift-configuration-client/cmd/acc/internal/utils"
 )
 
-var instanceTypes = []string{"i3", "m4", "m5", "m5a", "m6i", "c4", "c5", "c5a", "r4", "r5", "r5a", "t3", "t3a"}
-var instanceSizes = map[string][]string{
+// sets the logger output file
+
+func init() {
+	log.SetOutput(utils.LogFile)
+}
+
+//AWS Instance Types
+var awsInstanceTypes = []string{"i3", "m4", "m5", "m5a", "m6i", "c4", "c5", "c5a", "r4", "r5", "r5a", "t3", "t3a"}
+var awsInstanceSizes = map[string][]string{
 	"i3":  {"large"},
 	"m4":  {"large", "xlarge", "2xlarge", "4xlarge", "10xlarge", "16xlarge"},
 	"m5":  {"large", "xlarge", "2xlarge", "4xlarge", "8xlarge", "12xlarge", "16xlarge"},
@@ -24,67 +35,139 @@ var instanceSizes = map[string][]string{
 	"t3a": {"large", "xlarge", "2xlarge"},
 }
 
-var env = []string{"dev ", "sbx ", "infra ", "impl ", "prod ", "mgmt ", "test "}
+var envType = []string{"Bare Metal", "AWS", "Azure", "Open Stack", "RHV", "VSphere"}
+
+/// Cluster Main UI
+var env = map[string]bool{}
+
+var envOpts widget.CheckGroup
+
+var envTypeOpt string
+
+var envTabs container.AppTabs
 
 func clusterSettings() fyne.CanvasObject {
 
-	envTabs := container.NewAppTabs()
+	envEntry := widget.NewEntry()
+	newEnvForm := container.New(
+		layout.NewFormLayout(),
+		widget.NewLabel("Environment Name: "),
+		envEntry,
+	)
 
-	envOpts := widget.NewCheckGroup(env, func(s []string) {
+	envBtn := widget.NewButton("add environment", func() {
+		if envEntry.Text != "" {
+			showConfirmDialog(envEntry.Text)
+			envEntry.SetText("")
+		}
+	})
+	envOpts.Horizontal = true
 
+	envRadioGrp := widget.NewRadioGroup(envType, func(s string) {
+		envTypeOpt = s
+		log.Println("Cluster is being installed on " + s)
 	})
 
-	envOpts.Horizontal = true
+	envRadioGrp.Horizontal = true
+	envRadioGrp.SetSelected("Bare Metal")
+	envRadioGrp.Required = true
 
 	envTabs.Append(
 		container.NewTabItem("Global", container.New(
 			layout.NewVBoxLayout(),
+			widget.NewLabel("Environment Type:"),
+			envRadioGrp,
+			widget.NewLabel("Create a new environment:"),
+			newEnvForm,
+			envBtn,
 			widget.NewLabel("Check to enable an environment"),
-			envOpts,
+			container.NewHBox(&envOpts),
 			nodeCards(),
 			widget.NewButton("Save", func() {}),
 		)),
 	)
+	initEnvOpts()
+	initTabList()
+	return &envTabs
+}
 
-	for _, k := range env {
-		envTabs.Append(container.NewTabItem(k, container.New(
-			layout.NewVBoxLayout(),
-			widget.NewLabel(k),
-			nodeCards(),
-			widget.NewButton("Save", func() {}),
-		)))
+//UI functions
+func initEnvOpts() {
+	selected := []string{}
+	for k, v := range env {
+		envOpts.Append(k)
+		if v {
+			selected = append(selected, k)
+		}
 	}
+	envOpts.SetSelected(selected)
+}
 
-	return envTabs
+func updateEnvOpts(e string) {
+	envOpts.Append(e)
+	envOpts.SetSelected([]string{e})
+}
+
+func initTabList() {
+	for k, v := range env {
+		if v {
+			envTabs.Append(container.NewTabItem(k, container.New(
+				layout.NewVBoxLayout(),
+				widget.NewLabel(k),
+				nodeCards(),
+				widget.NewButton("Save", func() {}),
+			)))
+		}
+	}
+}
+
+func updateTabList(e string) {
+	envTabs.Append(container.NewTabItem(e, container.New(
+		layout.NewVBoxLayout(),
+		widget.NewLabel(e),
+		nodeCards(),
+		widget.NewButton("Save", func() {}),
+	)))
+}
+
+func showConfirmDialog(envName string) {
+	dialog := dialog.NewConfirm("Confirm New Environment", "Would You like to create Enviroment: "+envName+"?", func(b bool) {
+		if b {
+			env[envName] = true
+			updateEnvOpts(envName)
+			updateTabList(envName)
+		}
+	}, utils.MainWin)
+	dialog.Show()
 }
 
 func nodeCards() fyne.CanvasObject {
 
-	masterInstanceSize := widget.NewSelectEntry(instanceSizes[""])
+	masterInstanceSize := widget.NewSelectEntry(awsInstanceSizes[""])
 	masterInstanceSize.SetPlaceHolder("Choose a size")
-	masterInstanceType := widget.NewSelect(instanceTypes, func(s string) {
-		masterInstanceSize.SetOptions(instanceSizes[s])
+	masterInstanceType := widget.NewSelect(awsInstanceTypes, func(s string) {
+		masterInstanceSize.SetOptions(awsInstanceSizes[s])
 		masterInstanceSize.CreateRenderer().Refresh()
 	})
 
-	infraInstanceSize := widget.NewSelectEntry(instanceSizes[""])
+	infraInstanceSize := widget.NewSelectEntry(awsInstanceSizes[""])
 	infraInstanceSize.SetPlaceHolder("Choose a size")
-	infraInstanceType := widget.NewSelect(instanceTypes, func(s string) {
-		infraInstanceSize.SetOptions(instanceSizes[s])
+	infraInstanceType := widget.NewSelect(awsInstanceTypes, func(s string) {
+		infraInstanceSize.SetOptions(awsInstanceSizes[s])
 		infraInstanceSize.CreateRenderer().Refresh()
 	})
 
-	storageInstanceSize := widget.NewSelectEntry(instanceSizes[""])
+	storageInstanceSize := widget.NewSelectEntry(awsInstanceSizes[""])
 	storageInstanceSize.SetPlaceHolder("Choose a size")
-	storageInstanceType := widget.NewSelect(instanceTypes, func(s string) {
-		storageInstanceSize.SetOptions(instanceSizes[s])
+	storageInstanceType := widget.NewSelect(awsInstanceTypes, func(s string) {
+		storageInstanceSize.SetOptions(awsInstanceSizes[s])
 		storageInstanceSize.CreateRenderer().Refresh()
 	})
 
-	workerInstanceSize := widget.NewSelectEntry(instanceSizes[""])
+	workerInstanceSize := widget.NewSelectEntry(awsInstanceSizes[""])
 	workerInstanceSize.SetPlaceHolder("Choose a size")
-	workerInstanceType := widget.NewSelect(instanceTypes, func(s string) {
-		workerInstanceSize.SetOptions(instanceSizes[s])
+	workerInstanceType := widget.NewSelect(awsInstanceTypes, func(s string) {
+		workerInstanceSize.SetOptions(awsInstanceSizes[s])
 		workerInstanceSize.CreateRenderer().Refresh()
 	})
 
@@ -129,3 +212,17 @@ func nodeCards() fyne.CanvasObject {
 	)
 	return cards
 }
+
+// func nodeCards(){
+//     cards := container.New(
+// 		layout.NewGridLayout(2),
+// 		widget.NewCard("Master","",
+// 		    container.NewForm(
+// 				widget.NewLabel("Instance Type:"),
+// 				selectInstanceType,
+// 				widget.NewLabel("Instance Size:"),
+//                 selectInstanceSize,
+// 			),
+// 		),
+// 	)
+// }

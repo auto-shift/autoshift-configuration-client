@@ -1,28 +1,42 @@
 package impls
 
-//vars
-// structs
+import (
+	"errors"
+	"fmt"
+	"log"
+	"os"
 
-// top menu functionality
+	"github.com/auto-shift/autoshift-configuration-client/cmd/acc/internal/utils"
+)
 
-// call to read yaml files
-// func ReadYaml(fileDir string) map[string]interface{} {
+func init() {
+	logFile := utils.LogFile
 
-// 	yfile, err := ioutil.ReadFile(fileDir)
+	log.SetOutput(logFile)
+}
 
-// 	if err != nil {
+func ReadVars(envNames []string) {
 
-// 		log.Fatal(err)
-// 	}
+	if LocalRepo() {
+		accVars := ReadGitConfigs().GitDir + "/vars/accVars"
 
-// 	data := make(map[string]interface{})
+		if _, err := os.Stat(accVars); errors.Is(err, os.ErrNotExist) {
+			err := os.Mkdir(accVars, os.ModePerm)
+			if err != nil {
+				log.Println(err)
+			} else {
+				log.Println("Vars directory created at " + accVars)
+			}
+		}
 
-// 	err2 := yaml.Unmarshal(yfile, &data)
+		for _, k := range envNames {
+			_, err := os.Create(accVars + "/" + k + ".yml")
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				log.Println(k + ".yml " + "created")
+			}
+		}
 
-// 	if err2 != nil {
-
-// 		log.Fatal(err2)
-// 	}
-
-// 	return data
-// }
+	}
+}

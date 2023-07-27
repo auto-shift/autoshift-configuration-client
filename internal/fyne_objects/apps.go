@@ -8,27 +8,14 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-var dayOneAppList = []string{"ArgoCD", "OpenShift Data Foundations"}
-var dayTwoAppList = []string{"AMQ", "AAP", "Container Security Operator", "Cert-Manager", "Red Hat Advanced Cluster Manager", "Red Hat Advanced Cluster Security", "API for Data Protection", "Red Hat Code Ready Workspaces", "Red Hat Serverless"}
+var Applist = []string{"AMQ", "AAP", "Container Security Operator", "Cert-Manager", "Red Hat Advanced Cluster Manager", "Red Hat Advanced Cluster Security", "API for Data Protection", "Red Hat Code Ready Workspaces", "Red Hat Serverless"}
 
-func DayOneSettings(win fyne.Window) fyne.CanvasObject {
-
-	apps := container.New(
-		layout.NewGridLayout(2),
-	)
-	for _, k := range dayOneAppList {
-		apps.Add(appGroup(k, win))
-	}
-
-	return container.New(layout.NewVBoxLayout(), widget.NewLabel("Check to enable an application"), apps, layout.NewSpacer())
-}
-
-func DayTwoSettings(win fyne.Window) fyne.CanvasObject {
+func AppSettings(win fyne.Window) fyne.CanvasObject {
 
 	apps := container.New(
 		layout.NewGridLayout(2),
 	)
-	for _, k := range dayTwoAppList {
+	for _, k := range Applist {
 		apps.Add(appGroup(k, win))
 	}
 

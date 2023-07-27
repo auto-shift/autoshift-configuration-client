@@ -8,11 +8,12 @@ import (
 	"path/filepath"
 	"time"
 
-	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2"
 )
 
 var LogFileLoc string
 var LogFile = new(os.File)
+var MainWin fyne.Window
 
 func init() {
 	currDateTime := time.Now().String()
@@ -56,10 +57,10 @@ func GetLogs() []string {
 
 }
 
-func GetString(bs binding.String) string {
-	logs, err := bs.Get()
-	if err != nil {
-		log.Println(err)
-	}
-	return logs
-}
+// func GetString(bs binding.String) string {
+// 	logs, err := bs.Get()
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
+// 	return logs
+// }

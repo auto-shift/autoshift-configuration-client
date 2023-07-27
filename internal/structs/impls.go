@@ -12,7 +12,6 @@ func ReadArgoVars() Gitops_Vars {
 	gitDir := impls.ReadGitConfigs().GitDir
 	yfile, err := ioutil.ReadFile(gitDir + "/autoShift/vars/all/main.yml")
 	if err != nil {
-
 		log.Fatal(err)
 	}
 

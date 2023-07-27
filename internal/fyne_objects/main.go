@@ -19,13 +19,16 @@ import (
 
 var remove_kubeadmin = false
 
+// sets the logger output file
 func init() {
 	log.SetOutput(utils.LogFile)
 }
 
+// main app content
 func AppMain(win fyne.Window) fyne.CanvasObject {
 	// logList := utils.GetLogs()
 	// logs := binding.BindStringList(&(utils.GetLogs()))
+	utils.MainWin = win
 
 	logs := binding.NewStringList()
 	logs.Set(utils.GetLogs())
@@ -74,8 +77,7 @@ func AppMain(win fyne.Window) fyne.CanvasObject {
 		//TODO: Tab should allow configuration available CICD options
 		container.NewTabItem("CICD", Test()),
 		//TODO: Tab should allow create a top oriented AppTabs object with a tab for each service.
-		container.NewTabItem("Day 1 Apps", DayOneSettings(win)),
-		container.NewTabItem("Day 2 Apps", DayTwoSettings(win)),
+		container.NewTabItem("Apps", AppSettings(win)),
 	)
 	if !impls.LocalRepo() {
 		middle.DisableIndex(1)
@@ -96,6 +98,7 @@ func AppMain(win fyne.Window) fyne.CanvasObject {
 	return content
 }
 
+// get/set installation variables
 func generalSettings(win fyne.Window) fyne.CanvasObject {
 
 	settings := container.New(
