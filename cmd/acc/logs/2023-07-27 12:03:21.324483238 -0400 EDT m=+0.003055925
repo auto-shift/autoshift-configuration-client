@@ -1,9 +1,0 @@
-2023/07/27 12:03:21 Welcome to AutoShift Configuration Client
-2023/07/27 12:03:21 Creating a new cluster
-2023/07/27 12:03:21 Cluster is being installed on Bare Metal
-2023/07/27 12:03:21 /home/vslewis/Code/Go/github.com/auto-shift
-2023/07/27 12:03:39 Cluster is being installed on VSphere
-2023/07/27 12:03:40 Cluster is being installed on RHV
-2023/07/27 12:03:40 Cluster is being installed on Open Stack
-2023/07/27 12:03:42 Cluster is being installed on Azure
-2023/07/27 12:03:43 Cluster is being installed on AWS

@@ -74,8 +74,6 @@ func AppMain(win fyne.Window) fyne.CanvasObject {
 		container.NewTabItem("General", generalSettings(win)),
 		//TODO: Tab should allow configuration of cluster environment variables
 		container.NewTabItem("Cluster", clusterSettings()),
-		//TODO: Tab should allow configuration available CICD options
-		container.NewTabItem("CICD", Test()),
 		//TODO: Tab should allow create a top oriented AppTabs object with a tab for each service.
 		container.NewTabItem("Apps", AppSettings(win)),
 	)
@@ -99,26 +97,6 @@ func AppMain(win fyne.Window) fyne.CanvasObject {
 }
 
 // get/set installation variables
-func generalSettings(win fyne.Window) fyne.CanvasObject {
-
-	settings := container.New(
-		layout.NewVBoxLayout(),
-		widget.NewCard("Git Settings", "",
-			GitSettings(win)),
-		widget.NewCard("Installation Settings", "",
-			container.NewGridWithColumns(3,
-				widget.NewCheck("Remove Kubeadmin", func(b bool) {
-					if b {
-						remove_kubeadmin = true
-					} else {
-						remove_kubeadmin = false
-					}
-				}),
-			),
-		),
-	)
-	return settings
-}
 
 /// Menu functions
 
