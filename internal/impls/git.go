@@ -2,14 +2,12 @@ package impls
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 
-	"gopkg.in/yaml.v3"
-
 	// "github.com/auto-shift/autoshift-configuration-client/cmd/acc/internal/utils"
 
+	"github.com/auto-shift/autoshift-configuration-client/cmd/acc/internal/structs"
 	"github.com/auto-shift/autoshift-configuration-client/cmd/acc/internal/utils"
 	git "github.com/go-git/go-git/v5"
 	http "github.com/go-git/go-git/v5/plumbing/transport/http"
@@ -17,21 +15,46 @@ import (
 
 func init() {
 	logFile := utils.LogFile
-
 	log.SetOutput(logFile)
+	GitConfs = structs.GitVars{}.ReadGitConfigs()
 }
 
-//vars
+// func ReadGitConfigs() structs.GVars {
+
+// 	confPath, err := filepath.Abs("../../configs/vars.yaml")
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	}
+
+// 	yfile, err := os.ReadFile(confPath)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 		log.Fatal(err)
+// 	}
+// 	fmt.Println(yfile)
+
+// 	var gTest map[string]structs.GVars
+// 	err2 := yaml.Unmarshal([]byte(yfile), &gTest)
+// 	if err2 != nil {
+// 		fmt.Println("err2:")
+// 		fmt.Println(err2)
+// 	}
+// 	fmt.Println("test: ")
+// 	fmt.Println(gTest)
+
+// 	return gTest["gitVars"]
+// }
+
+// vars
+var GitConfs structs.GVars
+
 // structs
-type GitVars struct {
-	GitDir  string `yaml:"gitDir"`
-	GitUrl  string `yaml:"gitUrl"`
-	GitUser string `yaml:"gitUser"`
-}
 
-//Methods for interacting with a git repository
+// Methods for interacting with a git repository
 func GitClone(gitUser, gitPass, gitDir, gitUrl string) {
 	// var resp []string
+
+	log.Println("cloning " + gitUrl)
 
 	path := gitDir + "/autoShift"
 
@@ -47,7 +70,7 @@ func GitClone(gitUser, gitPass, gitDir, gitUrl string) {
 		// https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/
 		Auth: &http.BasicAuth{
 			Username: gitUser, // yes, this can be anything except an empty string
-			Password: gitPass,
+			Password: gitPass, // Requires access token, not password
 		},
 		URL:      gitUrl,
 		Progress: os.Stdout,
@@ -55,31 +78,32 @@ func GitClone(gitUser, gitPass, gitDir, gitUrl string) {
 	if err != nil {
 		fmt.Println("err1")
 		fmt.Println(err)
-	}
+		log.Println(err)
+	} else {
+		ref, err := r.Head()
+		if err != nil {
+			fmt.Println("err2")
+			fmt.Println(err)
+		}
 
-	ref, err := r.Head()
-	if err != nil {
-		fmt.Println("err2")
-		fmt.Println(err)
-	}
+		err = r.Storer.SetReference(ref)
+		CheckIfError(err)
 
-	err = r.Storer.SetReference(ref)
-	CheckIfError(err)
+		// ... retrieving the commit object
+		commit, err := r.CommitObject(ref.Hash())
+		if os.IsNotExist(err) {
 
-	// ... retrieving the commit object
-	commit, err := r.CommitObject(ref.Hash())
-	if os.IsNotExist(err) {
+			// resp[0] = "Clone Failed"
+			// resp[1] = fmt.Sprintln(err)
+			// return resp
+			fmt.Println(err)
+		}
 
-		// resp[0] = "Clone Failed"
-		// resp[1] = fmt.Sprintln(err)
+		// resp[0] = "Clone Successful"
+		// resp[1] = fmt.Sprintln(commit)
 		// return resp
-		fmt.Println(err)
+		log.Println(commit)
 	}
-
-	// resp[0] = "Clone Successful"
-	// resp[1] = fmt.Sprintln(commit)
-	// return resp
-	fmt.Println(commit)
 
 }
 
@@ -100,32 +124,22 @@ func GitClone(gitUser, gitPass, gitDir, gitUrl string) {
 // }
 
 // read git configs
-func ReadGitConfigs() GitVars {
+// func ReadGitConfigs() {
 
-	yfile, err := ioutil.ReadFile("../../configs/vars.yml")
-	if err != nil {
+// 	yfile, err := os.ReadFile("../../configs/vars.yml")
+// 	if err != nil {
 
-		log.Fatal(err)
-	}
+// 		log.Fatal(err)
+// 	}
 
-	var gitVars GitVars
-
-	err2 := yaml.Unmarshal(yfile, &gitVars)
-	if err2 != nil {
-		panic(err2)
-	}
-	return gitVars
-
-}
-
-func WriteGitConfigs(gitEdits GitVars) {
-	yEdits, err := yaml.Marshal(gitEdits)
-	if err != nil {
-		log.Println(err)
-	}
-	os.WriteFile("../../configs/vars.yml", yEdits, 0644)
-
-}
+// 	var gconfs structs.GitVars
+// 	err2 := yaml.Unmarshal(yfile, &gconfs)
+// 	if err2 != nil {
+// 		panic(err2)
+// 	}
+// 	fmt.Println("gconfs:")
+// 	fmt.Println(gconfs)
+// }
 
 // CheckIfError should be used to naively panics if an error is not nil.
 func CheckIfError(err error) {
@@ -137,10 +151,8 @@ func CheckIfError(err error) {
 	os.Exit(1)
 }
 
-func LocalRepo() bool {
-	gitDir := ReadGitConfigs().GitDir
-	log.Println(gitDir)
-	_, err := os.Stat(gitDir + "/autoShift")
+func IsLocalRepo() bool {
+	_, err := os.Stat(GitConfs.GetDir() + "/autoShift")
 	if err != nil {
 		log.Println(err)
 		return false

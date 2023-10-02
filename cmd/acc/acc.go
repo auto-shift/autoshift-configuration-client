@@ -20,7 +20,7 @@ func main() {
 
 	mainWin.SetContent(fyne_objects.AppMain(mainWin))
 
-	if impls.ReadGitConfigs().GitDir == "Not Set" {
+	if impls.GitConfs.GetDir() == "Not Set" {
 		fyne_objects.GitConfEditDialog(mainWin)
 	}
 

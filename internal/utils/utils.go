@@ -16,16 +16,24 @@ var LogFile = new(os.File)
 var MainWin fyne.Window
 
 func init() {
+
 	currDateTime := time.Now().String()
-	logLoc, err := filepath.Abs("./logs")
+	accPath := "./logs"
+	if _, err := os.Stat(accPath); os.IsNotExist(err) {
+		err := os.Mkdir(accPath, 0777)
+		fmt.Println("creating log directory")
+		log.Println(err)
+	}
+
+	logLoc, err := filepath.Abs(accPath)
 	if err != nil {
-		fmt.Println("logloc error: ")
+		fmt.Println("log path error: ")
 		fmt.Println(err)
 	}
 
 	LogFileLoc = logLoc + "/" + currDateTime
 
-	LogFile, err = os.OpenFile(LogFileLoc, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	LogFile, err = os.OpenFile(LogFileLoc, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		fmt.Println("LogFile error: ")
 		fmt.Println(err)

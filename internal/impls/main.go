@@ -17,8 +17,8 @@ func init() {
 
 func ReadVars(envNames []string) {
 
-	if LocalRepo() {
-		accVars := ReadGitConfigs().GitDir + "/vars/accVars"
+	if IsLocalRepo() {
+		accVars := GitConfs.GetDir() + "/vars/accVars"
 
 		if _, err := os.Stat(accVars); errors.Is(err, os.ErrNotExist) {
 			err := os.Mkdir(accVars, os.ModePerm)

@@ -77,7 +77,7 @@ func AppMain(win fyne.Window) fyne.CanvasObject {
 		//TODO: Tab should allow create a top oriented AppTabs object with a tab for each service.
 		container.NewTabItem("Apps", AppSettings(win)),
 	)
-	if !impls.LocalRepo() {
+	if !impls.IsLocalRepo() {
 		middle.DisableIndex(1)
 		middle.DisableIndex(2)
 		middle.DisableIndex(3)

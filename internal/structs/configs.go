@@ -14,6 +14,14 @@ package structs
 // 	argocd_image_version string `yaml:"argocd_image_version"`
 // }
 
+type Env struct {
+	env string `yaml:"platform"`
+}
+
+type clusters struct {
+	envs []string
+}
+
 type Gitops_Vars struct {
 	region               string `yaml:"region"`
 	branch_tag           string `yaml:"branch"`
@@ -47,7 +55,7 @@ type Day_One_Vars struct {
 }
 
 // # infra-nodes
-type Infra_Nodes struct {
+type InfraNode struct {
 	infra_nodes_enabled bool
 	infra               struct {
 		ec2_type bool
@@ -133,7 +141,7 @@ type allowedRegistryDomains struct {
 	insecure   bool
 }
 
-//manual-remediations
+// manual-remediations
 type Redmediations struct {
 	manual_remediations_enabled bool
 	allowedRegistriesForImport  struct {
@@ -232,7 +240,7 @@ type gatekeeper struct {
 	allowed_git_repos   []repo
 }
 
-//Cloud Watch Logging
+// Cloud Watch Logging
 type cloudwatch struct {
 	cw_log_forwarding_enabled bool
 	cloudwatch_aws_access_key string
@@ -266,7 +274,7 @@ type oauth struct {
 // # openshift-compliance-operator
 // openshift_compliance_operator: true
 
-//Cluster Logging
+// Cluster Logging
 type cluster_logging struct {
 	openshift_logging struct {
 		enabled           bool

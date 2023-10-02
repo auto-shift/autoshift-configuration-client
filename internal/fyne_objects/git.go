@@ -1,6 +1,7 @@
 package fyne_objects
 
 import (
+	"fmt"
 	"log"
 
 	"fyne.io/fyne/v2"
@@ -10,15 +11,16 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	utils "github.com/auto-shift/autoshift-configuration-client/cmd/acc/internal/impls"
+	"github.com/auto-shift/autoshift-configuration-client/cmd/acc/internal/impls"
+	"github.com/auto-shift/autoshift-configuration-client/cmd/acc/internal/structs"
 )
+
+var gitVars = structs.GitVars{}
 
 // form for viewing and editing git settings
 func GitSettings(win fyne.Window) fyne.CanvasObject {
 
-	gitInfo := utils.ReadGitConfigs()
-
-	gitDir := gitInfo.GitDir
+	gitDir := impls.GitConfs.GetDir()
 	dir := binding.BindString(&gitDir)
 	gitDirHBox := container.New(
 		layout.NewHBoxLayout(),
@@ -26,7 +28,7 @@ func GitSettings(win fyne.Window) fyne.CanvasObject {
 		widget.NewLabelWithData(dir),
 	)
 
-	gitUser := gitInfo.GitUser
+	gitUser := impls.GitConfs.GetUser()
 	user := binding.BindString(&gitUser)
 	gitUserHBox := container.New(
 		layout.NewHBoxLayout(),
@@ -34,7 +36,7 @@ func GitSettings(win fyne.Window) fyne.CanvasObject {
 		widget.NewLabelWithData(user),
 	)
 
-	gitUrl := gitInfo.GitUrl
+	gitUrl := impls.GitConfs.GetUrl()
 	url := binding.BindString(&gitUrl)
 	gitUrlHBox := container.New(
 		layout.NewHBoxLayout(),
@@ -63,8 +65,8 @@ func GitSettings(win fyne.Window) fyne.CanvasObject {
 						if !b {
 							return
 						}
-						utils.GitClone(gitUser, gitPass.Text, gitDir, gitUrl)
-						// gitResp := utils.GitClone(gitUser, gitPass.Text, gitDir, gitUrl)
+						impls.GitClone(gitUser, gitPass.Text, gitDir, gitUrl)
+						// gitResp := impls.GitClone(gitUser, gitPass.Text, gitDir, gitUrl)
 						// dialog.ShowInformation(gitResp[0], gitResp[1], win)
 					}, win)
 			},
@@ -72,17 +74,13 @@ func GitSettings(win fyne.Window) fyne.CanvasObject {
 		widget.NewButton(
 			"Push to Remote Repo",
 			func() {
-
-				GitConfEditDialog(win)
-
+				dialog.NewInformation("TODO:", "This button should push commits to remote repository", win)
 			},
 		),
 		widget.NewButton(
 			"Edit Git Settings",
 			func() {
-
 				GitConfEditDialog(win)
-
 			},
 		),
 	)
@@ -92,34 +90,32 @@ func GitSettings(win fyne.Window) fyne.CanvasObject {
 	return gitInfoCont
 }
 
-//Pop up dialog for editing git settings
+// Pop up dialog for editing git settings
 func GitConfEditDialog(win fyne.Window) {
-
-	gitSettings := utils.ReadGitConfigs()
-	var gitLoc string
 
 	label := widget.NewLabel("Git Settings")
 	label.Alignment = fyne.TextAlignCenter
 
-	gitUser := gitSettings.GitUser
+	gitUser := impls.GitConfs.GetUser()
 	user := binding.BindString(&gitUser)
 	userName := widget.NewEntry()
 	userName.Bind(user)
 
-	gitUrl := gitSettings.GitUrl
+	gitUrl := impls.GitConfs.GetUrl()
 	url := binding.BindString(&gitUrl)
 	gitRepo := widget.NewEntry()
 	gitRepo.Bind(url)
 
 	getDirLoc := func(list fyne.ListableURI, err error) {
 		if err != nil {
+			fmt.Println("line 111, fyne_obj/git.go:")
 			panic(err)
 		}
 		if list == nil {
 			log.Println("Cancelled")
 		}
 
-		gitLoc = list.Path()
+		impls.GitConfs.SetDir(list.Path())
 	}
 
 	repoDir := widget.NewButtonWithIcon("", theme.FolderOpenIcon(), func() {
@@ -137,12 +133,14 @@ func GitConfEditDialog(win fyne.Window) {
 			return
 		}
 
-		gitVars := utils.GitVars{
-			GitDir:  gitLoc,
-			GitUrl:  gitRepo.Text,
-			GitUser: userName.Text,
-		}
-		utils.WriteGitConfigs(gitVars)
+		impls.GitConfs.SetUrl(gitRepo.Text)
+
+		impls.GitConfs.SetUser(userName.Text)
+		fmt.Println(impls.GitConfs)
+		gitVars.UpdateGitVars(impls.GitConfs)
+		fmt.Println("updated gitVars:")
+		fmt.Println(gitVars)
+		gitVars.WriteGitConfigs()
 		win.SetContent(AppMain(win))
 	}, win)
 

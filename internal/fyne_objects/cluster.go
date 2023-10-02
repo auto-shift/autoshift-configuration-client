@@ -1,13 +1,18 @@
 package fyne_objects
 
 import (
+	"image/color"
 	"log"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
+	"github.com/auto-shift/autoshift-configuration-client/cmd/acc/internal/data"
+	"github.com/auto-shift/autoshift-configuration-client/cmd/acc/internal/structs"
 	"github.com/auto-shift/autoshift-configuration-client/cmd/acc/internal/utils"
 )
 
@@ -15,45 +20,37 @@ import (
 
 func init() {
 	log.SetOutput(utils.LogFile)
+
 }
 
-//AWS Instance Types
-var awsInstanceTypes = []string{"i3", "m4", "m5", "m5a", "m6i", "c4", "c5", "c5a", "r4", "r5", "r5a", "t3", "t3a"}
-var awsInstanceSizes = map[string][]string{
-	"i3":  {"large"},
-	"m4":  {"large", "xlarge", "2xlarge", "4xlarge", "10xlarge", "16xlarge"},
-	"m5":  {"large", "xlarge", "2xlarge", "4xlarge", "8xlarge", "12xlarge", "16xlarge"},
-	"m5a": {"large", "xlarge", "2xlarge", "4xlarge", "8xlarge", "10xlarge", "16xlarge"},
-	"m6i": {"xlarge", "2xlarge", "4xlarge", "8xlarge", "16xlarge"},
-	"c4":  {"2xlarge", "4xlarge", "8xlarge"},
-	"c5":  {"xlarge", "2xlarge", "4xlarge", "9xlarge", "12xlarge", "18xlarge", "24xlarge"},
-	"c5a": {"xlarge", "2xlarge", "4xlarge", "8xlarge", "12xlarge", "16xlarge", "24xlarge"},
-	"r4":  {"large", "xlarge", "2xlarge", "4xlarge", "8xlarge", "16xlarge"},
-	"r5":  {"large", "xlarge", "2xlarge", "4xlarge", "8xlarge", "12xlarge", "16xlarge", "24xlarge"},
-	"r5a": {"large", "xlarge", "2xlarge", "4xlarge", "8xlarge", "12xlarge", "16xlarge", "24xlarge"},
-	"t3":  {"large", "xlarge", "2xlarge"},
-	"t3a": {"large", "xlarge", "2xlarge"},
-}
-
-var envType = []string{"Bare Metal", "AWS", "Azure", "Open Stack", "RHV", "VSphere"}
-
-/// Cluster Main UI
-var env = map[string]bool{}
-
-var envOpts widget.CheckGroup
-
+// vars
+var tlDomain = "localhost"
+var envTypeSel = "Bare Metal"
+var platformList = data.Platform
+var envVars = structs.TabVars{}
+var envList = map[string]bool{}
 var envTypeOpt string
+var tabList = structs.TabList{}
 
+// / Cluster Main UI
+var envOpts widget.CheckGroup
 var envTabs container.AppTabs
 
+// main cluster function
 func clusterSettings() fyne.CanvasObject {
 
-	envEntry := widget.NewEntry()
-	newEnvForm := container.New(
-		layout.NewFormLayout(),
-		widget.NewLabel("Environment Name: "),
-		envEntry,
+	domainBind := binding.NewString()
+	domainBind.Set(tlDomain)
+	domainEntry := widget.NewEntryWithData(domainBind)
+	domainForm := widget.NewCard("Domain: ", "",
+		container.New(
+			layout.NewFormLayout(),
+			widget.NewLabel("Top Level Domain: "),
+			domainEntry,
+		),
 	)
+
+	envEntry := widget.NewEntry()
 
 	envBtn := widget.NewButton("add environment", func() {
 		if envEntry.Text != "" {
@@ -63,38 +60,64 @@ func clusterSettings() fyne.CanvasObject {
 	})
 	envOpts.Horizontal = true
 
-	envRadioGrp := widget.NewRadioGroup(envType, func(s string) {
+	envSelect := widget.NewSelect(platformList, func(s string) {
 		envTypeOpt = s
 		log.Println("Cluster is being installed on " + s)
 	})
 
-	envRadioGrp.Horizontal = true
-	envRadioGrp.SetSelected("Bare Metal")
-	envRadioGrp.Required = true
+	newEnvForm := container.New(
+		layout.NewFormLayout(),
+		widget.NewLabel("Environment Type:"),
+		envSelect,
+		widget.NewLabel("Environment Name: "),
+		envEntry,
+	)
+
+	var err error
+	envTypeBind := binding.NewString()
+	envTypeBind.Set(envTypeSel)
+	envSelect.Selected, err = envTypeBind.Get()
+	if err != nil {
+		log.Println(err)
+	}
+
+	newClusterCard := widget.NewCard("Add a new Environment:", "",
+		container.New(
+			layout.NewVBoxLayout(),
+			newEnvForm,
+			envBtn,
+		),
+	)
+
+	envCheckGrpCard := widget.NewCard("Environments", "", container.New(
+		layout.NewVBoxLayout(),
+		widget.NewLabel("Check to enable an environment"),
+		container.NewHBox(&envOpts)),
+	)
+
+	line := canvas.NewLine(color.Black)
+	line.StrokeWidth = 5
 
 	envTabs.Append(
 		container.NewTabItem("Global", container.New(
 			layout.NewVBoxLayout(),
-			widget.NewLabel("Environment Type:"),
-			envRadioGrp,
-			widget.NewLabel("Create a new environment:"),
-			newEnvForm,
-			envBtn,
-			widget.NewLabel("Check to enable an environment"),
-			container.NewHBox(&envOpts),
-			nodeCards(),
+			domainForm,
+			envCheckGrpCard,
+			newClusterCard,
+			line,
 			widget.NewButton("Save", func() {}),
-		)),
-	)
+		),
+		))
+
 	initEnvOpts()
 	initTabList()
 	return &envTabs
 }
 
-//UI functions
+// UI functions
 func initEnvOpts() {
 	selected := []string{}
-	for k, v := range env {
+	for k, v := range envList {
 		envOpts.Append(k)
 		if v {
 			selected = append(selected, k)
@@ -108,121 +131,46 @@ func updateEnvOpts(e string) {
 	envOpts.SetSelected([]string{e})
 }
 
-func initTabList() {
-	for k, v := range env {
-		if v {
-			envTabs.Append(container.NewTabItem(k, container.New(
-				layout.NewVBoxLayout(),
-				widget.NewLabel(k),
-				nodeCards(),
-				widget.NewButton("Save", func() {}),
-			)))
-		}
-	}
-}
+// Function creates new tabs
+func updateTabList(eVars structs.TabVars) {
+	env := eVars.GetEnv()
 
-func updateTabList(e string) {
-	envTabs.Append(container.NewTabItem(e, container.New(
+	envTabs.Append(container.NewTabItem(env, container.New(
 		layout.NewVBoxLayout(),
-		widget.NewLabel(e),
-		nodeCards(),
+		widget.NewLabel(env),
+		nodeCards(env, eVars.GetNodes()),
 		widget.NewButton("Save", func() {}),
 	)))
 }
 
+// creates the global tab and tabs for already created environments
+func initTabList() {
+	for k, v := range envList {
+		if v {
+			updateTabList(findTabByEnv(k))
+
+		}
+	}
+}
+
+// confirms new environment tab creation
 func showConfirmDialog(envName string) {
 	dialog := dialog.NewConfirm("Confirm New Environment", "Would You like to create Enviroment: "+envName+"?", func(b bool) {
 		if b {
-			env[envName] = true
+			envList[envName] = true
 			updateEnvOpts(envName)
-			updateTabList(envName)
+			//create tab and add to updateTabList
+
+			updateTabList(findTabByEnv(envName))
 		}
 	}, utils.MainWin)
 	dialog.Show()
 }
 
-func nodeCards() fyne.CanvasObject {
-
-	masterInstanceSize := widget.NewSelectEntry(awsInstanceSizes[""])
-	masterInstanceSize.SetPlaceHolder("Choose a size")
-	masterInstanceType := widget.NewSelect(awsInstanceTypes, func(s string) {
-		masterInstanceSize.SetOptions(awsInstanceSizes[s])
-		masterInstanceSize.CreateRenderer().Refresh()
-	})
-
-	infraInstanceSize := widget.NewSelectEntry(awsInstanceSizes[""])
-	infraInstanceSize.SetPlaceHolder("Choose a size")
-	infraInstanceType := widget.NewSelect(awsInstanceTypes, func(s string) {
-		infraInstanceSize.SetOptions(awsInstanceSizes[s])
-		infraInstanceSize.CreateRenderer().Refresh()
-	})
-
-	storageInstanceSize := widget.NewSelectEntry(awsInstanceSizes[""])
-	storageInstanceSize.SetPlaceHolder("Choose a size")
-	storageInstanceType := widget.NewSelect(awsInstanceTypes, func(s string) {
-		storageInstanceSize.SetOptions(awsInstanceSizes[s])
-		storageInstanceSize.CreateRenderer().Refresh()
-	})
-
-	workerInstanceSize := widget.NewSelectEntry(awsInstanceSizes[""])
-	workerInstanceSize.SetPlaceHolder("Choose a size")
-	workerInstanceType := widget.NewSelect(awsInstanceTypes, func(s string) {
-		workerInstanceSize.SetOptions(awsInstanceSizes[s])
-		workerInstanceSize.CreateRenderer().Refresh()
-	})
-
-	cards := container.New(
-		layout.NewGridLayout(2),
-		widget.NewCard("Master Nodes", "",
-			container.New(
-				layout.NewFormLayout(),
-				widget.NewLabel("Instance Type"),
-				masterInstanceType,
-				widget.NewLabel("Instance Size"),
-				masterInstanceSize,
-			),
-		),
-		widget.NewCard("Infra Nodes", "",
-			container.New(
-				layout.NewFormLayout(),
-				widget.NewLabel("Instance Type"),
-				infraInstanceType,
-				widget.NewLabel("Instance Size"),
-				infraInstanceSize,
-			),
-		),
-		widget.NewCard("Storage Nodes", "",
-			container.New(
-				layout.NewFormLayout(),
-				widget.NewLabel("Instance Type"),
-				storageInstanceType,
-				widget.NewLabel("Instance Size"),
-				storageInstanceSize,
-			),
-		),
-		widget.NewCard("Worker Nodes", "",
-			container.New(
-				layout.NewFormLayout(),
-				widget.NewLabel("Instance Type"),
-				workerInstanceType,
-				widget.NewLabel("Instance Size"),
-				workerInstanceSize,
-			),
-		),
-	)
-	return cards
+func findTabByEnv(env string) structs.TabVars {
+	tab := tabList.SearchTabs(env)
+	if (tab == structs.TabVars{}) {
+		tab.SetEnv(env)
+	}
+	return tab
 }
-
-// func nodeCards(){
-//     cards := container.New(
-// 		layout.NewGridLayout(2),
-// 		widget.NewCard("Master","",
-// 		    container.NewForm(
-// 				widget.NewLabel("Instance Type:"),
-// 				selectInstanceType,
-// 				widget.NewLabel("Instance Size:"),
-//                 selectInstanceSize,
-// 			),
-// 		),
-// 	)
-// }
