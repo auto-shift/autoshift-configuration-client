@@ -12,7 +12,7 @@ import (
 	http "github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
-//vars
+// vars
 // structs
 type GitVars struct {
 	GitDir  string `yaml:"gitDir"`
@@ -20,7 +20,7 @@ type GitVars struct {
 	GitUser string `yaml:"gitUser"`
 }
 
-//Methods for interacting with a git repository
+// Methods for interacting with a git repository
 func GitClone(gitUser, gitPass, gitDir, gitUrl string) {
 	// var resp []string
 
