@@ -1,12 +1,11 @@
-package utils
+package ui
 
 import (
 	"fmt"
 	"net/url"
 
-	"fyne.io/fyne/v2/driver/desktop"
-
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -117,25 +116,3 @@ func shortcutFocused(s fyne.Shortcut, w fyne.Window) {
 		focused.TypedShortcut(s)
 	}
 }
-
-// call to read yaml files
-// func ReadYaml(fileDir string) map[string]interface{} {
-
-// 	yfile, err := ioutil.ReadFile(fileDir)
-
-// 	if err != nil {
-
-// 		log.Fatal(err)
-// 	}
-
-// 	data := make(map[string]interface{})
-
-// 	err2 := yaml.Unmarshal(yfile, &data)
-
-// 	if err2 != nil {
-
-// 		log.Fatal(err2)
-// 	}
-
-// 	return data
-// }

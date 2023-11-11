@@ -1,4 +1,4 @@
-package fyne_objects
+package ui
 
 import (
 	"log"
@@ -92,7 +92,7 @@ func GitSettings(win fyne.Window) fyne.CanvasObject {
 	return gitInfoCont
 }
 
-//Pop up dialog for editing git settings
+// Pop up dialog for editing git settings
 func GitConfEditDialog(win fyne.Window) {
 
 	gitSettings := utils.ReadGitConfigs()
